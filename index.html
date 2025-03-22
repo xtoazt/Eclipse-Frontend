@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vercel Chat</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background: #111; color: white; }
+        #chat { max-width: 400px; margin: auto; padding: 10px; border-radius: 5px; background: #222; }
+        #messages { height: 300px; overflow-y: auto; text-align: left; padding: 5px; }
+        .message { padding: 5px; margin: 5px 0; background: #007bff; border-radius: 5px; color: white; }
+        input, button { padding: 10px; margin: 5px; font-size: 16px; }
+        input { width: 70%; }
+        button { background: #007bff; color: white; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div id="chat">
+    <div id="messages"></div>
+    <input type="text" id="message" placeholder="Type a message...">
+    <button onclick="sendMessage()">Send</button>
+</div>
+
+<script>
+    const API_URL = "https://YOUR_VERCEL_BACKEND.vercel.app/api/chat";
+    const eventSource = new EventSource(API_URL);
+
+    eventSource.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        const messagesDiv = document.getElementById("messages");
+        messagesDiv.innerHTML = "";
+        data.messages.forEach(msg => {
+            const div = document.createElement("div");
+            div.classList.add("message");
+            div.textContent = msg.text;
+            messagesDiv.appendChild(div);
+        });
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    };
+
+    function sendMessage() {
+        const message = document.getElementById("message").value.trim();
+        if (!message) return;
+        fetch(API_URL, {
+            method: "POST",
+            body: JSON.stringify({ text: message }),
+            headers: { "Content-Type": "application/json" }
+        });
+        document.getElementById("message").value = "";
+    }
+</script>
+
+</body>
+</html>
